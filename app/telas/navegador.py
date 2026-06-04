@@ -1,10 +1,16 @@
 from app.modulos.user import Usuario
+from app.telas import dashboard_admin, dashboard_escuderia, dashboard_piloto
 from app.telas.base import telas_disponiveis
-from app.telas.dashboard import _mock, renderizar
+
+_dashboards = {
+    "Admin": dashboard_admin.renderizar,
+    "Escuderia": dashboard_escuderia.renderizar,
+    "Piloto": dashboard_piloto.renderizar,
+}
 
 
 async def iniciar(usuario: Usuario) -> None:
-    renderizar(usuario, _mock())
+    await _dashboards[usuario.tipo](usuario)
 
     while True:
         disponiveis = telas_disponiveis(usuario.tipo)
