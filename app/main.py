@@ -1,7 +1,9 @@
 import asyncio
 import getpass
 import logging
+import os
 
+import dotenv
 from rich.traceback import install
 
 from app.modulos.auth import CredenciaisInvalidas, login_usuario
@@ -10,10 +12,14 @@ from app.database.database_service import close_pool, init_pool
 from app.telas import telas as _  # registra todas as telas
 from app.telas.navegador import iniciar
 
-logging.basicConfig(level=logging.INFO)
+dotenv.load_dotenv()
+
+if os.getenv("DEV", "").lower() == "true":
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.disable(logging.CRITICAL)
 
 install(show_locals=True, max_frames=3)
-
 
 async def main():
     await init_pool()

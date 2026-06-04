@@ -26,3 +26,11 @@ async def registrar_login(userid: int, conexao: asyncpg.Connection) -> None:
 
 async def registrar_logout(userid: int) -> None:
     await _registrar_acao(userid, "LOGOUT")
+
+
+async def registrar_criar_piloto(userid: int, conexao: asyncpg.Connection | None = None) -> None:
+    await _registrar_acao(userid, "CRIAR_PIL", conexao)
+
+
+async def registrar_criar_escuderia(userid: int, conexao: asyncpg.Connection | None = None) -> None:
+    await _registrar_acao(userid, "CRIAR_ESC", conexao)
