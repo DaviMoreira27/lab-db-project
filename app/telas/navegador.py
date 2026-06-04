@@ -1,12 +1,14 @@
 from app.modulos.user import Usuario
 from app.telas.base import telas_disponiveis
+from app.telas.dashboard import _mock, renderizar
 
 
 async def iniciar(usuario: Usuario) -> None:
+    renderizar(usuario, _mock())
+
     while True:
         disponiveis = telas_disponiveis(usuario.tipo)
 
-        print(f"\n=== Menu ({usuario.tipo}) ===")
         for i, t in enumerate(disponiveis, 1):
             print(f"{i}. {t.nome}")
         print("0. Sair")
