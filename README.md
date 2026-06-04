@@ -26,6 +26,16 @@ DB_STRING="postgresql://user:password@host:port/database"
 
 ## Rodar
 
+Os comandos devem ser executados a partir da raiz do projeto (`lab-db-project/`), com o venv ativado.
+
+Bash/Zsh:
 ```bash
+source .venv/bin/activate
+python -m app.main
+```
+
+Fish:
+```fish
+source .venv/bin/activate.fish
 python -m app.main
 ```
