@@ -6,6 +6,7 @@ import asyncpg
 from app.modulos import admin
 from app.modulos.user import Usuario
 from app.telas.base import tela
+from app.telas.relatorios_admin import menu_relatorios
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ async def relatorio_pilotos(usuario: Usuario) -> None:
 
 @tela("Relatórios", tipos_permitidos=["Admin"])
 async def relatorios_admin(usuario: Usuario) -> None:
-    print("\nRelatórios (a implementar)")
+    await menu_relatorios(usuario)
 
 
 def _selecionar_pais(paises: list) -> int:
