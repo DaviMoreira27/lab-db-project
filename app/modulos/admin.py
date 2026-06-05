@@ -5,6 +5,27 @@ from app.database.database_service import get_pool
 from app.modulos.user_logging import registrar_criar_escuderia, registrar_criar_piloto
 
 
+async def buscar_dados_dashboard() -> dict:
+    pool = get_pool()
+    async with pool.acquire() as conexao:
+        totais = await conexao.fetchrow(
+            "SELECT"
+            " (SELECT COUNT(*) FROM drivers) AS pilotos,"
+            " (SELECT COUNT(*) FROM constructors) AS escuderias,"
+            " (SELECT COUNT(*) FROM seasons) AS temporadas,"
+            " (SELECT MAX(year) FROM seasons) AS ano_temporada_recente"
+        )
+        corridas = await conexao.fetch("SELECT * FROM vw_corridas_temporada_atual")
+        escuderias = await conexao.fetch("SELECT * FROM vw_escuderias_temporada_atual")
+        pilotos = await conexao.fetch("SELECT * FROM vw_pilotos_temporada_atual")
+        return {
+            "totais": totais,
+            "corridas": corridas,
+            "escuderias": escuderias,
+            "pilotos": pilotos,
+        }
+
+
 async def buscar_paises() -> list[asyncpg.Record]:
     pool = get_pool()
     async with pool.acquire() as conexao:

@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
+from app.modulos.admin import buscar_dados_dashboard
 from app.modulos.user import Usuario
 
 console = Console()
@@ -72,7 +73,31 @@ def _mock() -> DadosDashboardAdmin:
 
 
 async def renderizar(usuario: Usuario) -> None:
-    dados = _mock()
+    raw = await buscar_dados_dashboard()
+    totais = raw["totais"]
+    dados = DadosDashboardAdmin(
+        total_pilotos=totais["pilotos"],
+        total_escuderias=totais["escuderias"],
+        total_temporadas=totais["temporadas"],
+        temporada_recente=totais["ano_temporada_recente"],
+        corridas=[
+            Corrida(
+                circuito=r["circuito"],
+                data=r["data"].strftime("%d/%m/%Y") if r["data"] else "-",
+                horario=r["horario"].strftime("%H:%M") if r["horario"] else "-",
+                voltas=r["quantidade_voltas"] or 0,
+            )
+            for r in raw["corridas"]
+        ],
+        escuderias=[
+            EscuderiaTemporada(nome=e["escuderia"], pontos=e["total_pontos"])
+            for e in raw["escuderias"]
+        ],
+        pilotos=[
+            PilotoTemporada(nome=p["piloto"], pontos=p["total_pontos"])
+            for p in raw["pilotos"]
+        ],
+    )
     temporada_label = str(dados.temporada_recente) if dados.temporada_recente else "-"
 
     console.print()
