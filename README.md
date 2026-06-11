@@ -41,6 +41,27 @@ source .venv/bin/activate.fish
 python -m app.main
 ```
 
+Para login, há 3 tipos de usuário: admin, escuderias e pilotos
+
+
+Admin:
+```
+Login: admin
+Senha: admin
+```
+
+Escuderia:
+```
+Login: nomeEscuderia_c (exemplo: ferrari_c)
+Senha: nomeEscuderia (exemplo: ferrari)
+```
+
+Piloto:
+```
+Login: nomePiloto_c (exemplo: hamilton_d)
+Senha: nomePiloto (exemplo: hamilton)
+```
+
 ---
 
 ## Estrutura do projeto
