@@ -4,7 +4,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
-from app.modulos import piloto
+from app.modulos import pilotos
 from app.modulos.user import Usuario
 
 console = Console()
@@ -34,11 +34,11 @@ async def menu_relatorios(usuario: Usuario) -> None:
 
 
 async def tela_relatorio_6(usuario: Usuario) -> None:
-    driver_id = usuario.id_original
-    registros = await piloto.buscar_relatorio_pontos_por_ano(driver_id)
+    driver_id = usuario.id_original if usuario.id_original else 0
+    registros = await pilotos.buscar_relatorio_pontos_por_ano(driver_id)
 
     if not registros:
-        console.print("\nNenhum ponto registrado para este piloto.")
+        console.print("\nNenhum ponto registrado para este pilotos.")
         return
 
     # agrupa corridas por ano
@@ -72,8 +72,8 @@ async def tela_relatorio_6(usuario: Usuario) -> None:
 
 
 async def tela_relatorio_7(usuario: Usuario) -> None:
-    driver_id = usuario.id_original
-    registros = await piloto.buscar_relatorio_status(driver_id)
+    driver_id = usuario.id_original if usuario.id_original else 0
+    registros = await pilotos.buscar_relatorio_status(driver_id)
 
     if not registros:
         console.print("\nNenhum resultado encontrado para este piloto.")
