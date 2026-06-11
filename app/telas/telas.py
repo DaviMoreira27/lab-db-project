@@ -3,10 +3,11 @@ from datetime import date, datetime
 
 import asyncpg
 
-from app.modulos import admin
+from app.modulos import admin, escuderia
 from app.modulos.user import Usuario
 from app.telas.base import tela
 from app.telas.relatorios_admin import menu_relatorios
+from app.telas.relatorios_escuderia import menu_relatorios as menu_relatorios_escuderia
 from app.telas.relatorios_piloto import menu_relatorios as menu_relatorios_piloto
 
 logger = logging.getLogger(__name__)
@@ -18,15 +19,74 @@ async def meu_perfil(usuario: Usuario) -> None:
     print(f"Tipo:  {usuario.tipo}")
 
 
+# ---- Escuderia ----
+
 @tela("Relatório de escuderias", tipos_permitidos=["Escuderia"])
 async def relatorio_escuderias(usuario: Usuario) -> None:
-    print("\nRelatório de escuderias")
+    await menu_relatorios_escuderia(usuario)
 
+
+@tela("Consultar piloto por sobrenome", tipos_permitidos=["Escuderia"])
+async def tela_consultar_piloto(usuario: Usuario) -> None:
+    sobrenome = input("\nSobrenome do piloto: ").strip()
+    if not sobrenome:
+        print("Campo obrigatório.")
+        return
+
+    registros = await escuderia.consultar_piloto_por_sobrenome(usuario.id_original, sobrenome)
+
+    if not registros:
+        print(f"Nenhum piloto com sobrenome '{sobrenome}' correu por esta escuderia.")
+        return
+
+    print(f"\nPilotos com sobrenome '{sobrenome}':")
+    for r in registros:
+        nascimento = r["data_nascimento"].strftime("%d/%m/%Y") if r["data_nascimento"] else "-"
+        print(f"  {r['piloto']}  |  {nascimento}  |  {r['pais']}")
+
+
+@tela("Inserir pilotos por arquivo", tipos_permitidos=["Escuderia"])
+async def tela_inserir_pilotos_arquivo(usuario: Usuario) -> None:
+    caminho = input("\nCaminho do arquivo CSV (uma linha por piloto): ").strip()
+    if not caminho:
+        print("Campo obrigatório.")
+        return
+
+    try:
+        resultado = await escuderia.inserir_pilotos_por_arquivo(usuario.userid, caminho)
+    except FileNotFoundError:
+        print(f"Arquivo não encontrado: {caminho}")
+        return
+    except OSError as e:
+        logger.error("Erro ao ler arquivo: %s", e)
+        print("Não foi possível ler o arquivo.")
+        return
+
+    inseridos = resultado["inseridos"]
+    duplicados = resultado["duplicados"]
+    erros = resultado["erros"]
+
+    print(
+        f"\n{len(inseridos)} inserido(s), "
+        f"{len(duplicados)} duplicado(s), "
+        f"{len(erros)} com erro."
+    )
+    for nome in inseridos:
+        print(f"  inserido: {nome}")
+    for nome in duplicados:
+        print(f"  já existe (pulado): {nome}")
+    for erro in erros:
+        print(f"  erro: {erro}")
+
+
+# ---- Piloto ----
 
 @tela("Relatório de pilotos", tipos_permitidos=["Piloto"])
 async def relatorio_pilotos(usuario: Usuario) -> None:
     await menu_relatorios_piloto(usuario)
 
+
+# ---- Admin ----
 
 @tela("Relatórios", tipos_permitidos=["Admin"])
 async def relatorios_admin(usuario: Usuario) -> None:
