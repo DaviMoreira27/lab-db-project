@@ -1,4 +1,4 @@
-- Relatório
+-- Relatório 6 e 7 — Piloto
 -- B-tree, sem dúvida. Aqui o raciocínio:
 -- O relatório faz três coisas que favorecem B-tree:
 -- Filtro por driver_id — equivalência (WHERE driver_id = ?). Hash também serviria aqui.
