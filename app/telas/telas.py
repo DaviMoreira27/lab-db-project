@@ -7,6 +7,7 @@ from app.modulos import admin
 from app.modulos.user import Usuario
 from app.telas.base import tela
 from app.telas.relatorios_admin import menu_relatorios
+from app.telas.relatorios_piloto import menu_relatorios as menu_relatorios_piloto
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ async def relatorio_escuderias(usuario: Usuario) -> None:
 
 @tela("Relatório de pilotos", tipos_permitidos=["Piloto"])
 async def relatorio_pilotos(usuario: Usuario) -> None:
-    print("\nRelatório de pilotos")
+    await menu_relatorios_piloto(usuario)
 
 
 @tela("Relatórios", tipos_permitidos=["Admin"])
