@@ -9,7 +9,7 @@
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate    # Windows: .venv\Scripts\Activate.ps1 (PowerShell) ou .venv\Scripts\activate.bat (CMD)
 pip install -r require.txt
 ```
 
@@ -38,6 +38,18 @@ python -m app.main
 Fish:
 ```fish
 source .venv/bin/activate.fish
+python -m app.main
+```
+
+PowerShell (Windows):
+```powershell
+.venv\Scripts\Activate.ps1
+python -m app.main
+```
+
+CMD (Windows):
+```cmd
+.venv\Scripts\activate.bat
 python -m app.main
 ```
 
