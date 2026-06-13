@@ -11,6 +11,7 @@ console = Console()
 
 
 async def menu_relatorios(usuario: Usuario) -> None:
+    """Menu interativo"""
     opcoes = [
         ("Pontos por ano e corrida", tela_relatorio_6),
         ("Resultados por status", tela_relatorio_7),
@@ -34,6 +35,12 @@ async def menu_relatorios(usuario: Usuario) -> None:
 
 
 async def tela_relatorio_6(usuario: Usuario) -> None:
+    """
+    Exibe os pontos conquistados pelo piloto, agrupados por temporada.
+    Cada ano gera uma tabela separada com as corridas e os pontos,
+    além do total acumulado no ano.
+    """
+    # Usa id_original quando disponível; caso contrário, 0 como fallback
     driver_id = usuario.id_original if usuario.id_original else 0
     registros = await pilotos.buscar_relatorio_pontos_por_ano(driver_id)
 
@@ -41,7 +48,7 @@ async def tela_relatorio_6(usuario: Usuario) -> None:
         console.print("\nNenhum ponto registrado para este pilotos.")
         return
 
-    # agrupa corridas por ano
+    # Agrupa os registros por ano e extrai o total anual
     por_ano: dict[int, list] = defaultdict(list)
     total_por_ano: dict[int, float] = {}
     for r in registros:
@@ -53,6 +60,7 @@ async def tela_relatorio_6(usuario: Usuario) -> None:
         corridas = por_ano[ano]
         total = total_por_ano[ano]
 
+        # Uma tabela por temporada, com o total destacado no título
         tabela = Table(
             title=f"{ano}  —  Total: [yellow]{total}[/] pts",
             box=box.SIMPLE_HEAVY,
@@ -65,6 +73,7 @@ async def tela_relatorio_6(usuario: Usuario) -> None:
         for c in corridas:
             tabela.add_row(
                 c["corrida"],
+                # Formata a data e exibe "-" se ausente
                 c["data"].strftime("%d/%m/%Y") if c["data"] else "-",
                 str(float(c["pontos"])),
             )
@@ -72,6 +81,10 @@ async def tela_relatorio_6(usuario: Usuario) -> None:
 
 
 async def tela_relatorio_7(usuario: Usuario) -> None:
+    """
+    Exibe um resumo dos resultados do piloto agrupados por status
+    com a contagem de ocorrências de cada um.
+    """
     driver_id = usuario.id_original if usuario.id_original else 0
     registros = await pilotos.buscar_relatorio_status(driver_id)
 
