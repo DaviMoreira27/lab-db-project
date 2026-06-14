@@ -9,8 +9,8 @@ CREATE TABLE users (
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- A autenticação foi implementada diretamente pela tabela USERS devido a população inicial dos dados. O dataset possui centenas de pilotos e escuderias. 
--- Criar roles nativas exigiria um script externo com acesso administrativo ao SGBD para a carga inicial, 
+-- A autenticação foi implementada diretamente pela tabela USERS devido a população inicial dos dados. O dataset possui centenas de pilotos e escuderias.
+-- Criar roles nativas exigiria um script externo com acesso administrativo ao SGBD para a carga inicial,
 -- aumentando a complexidade do setup. Com a tabela USERS um único INSERT INTO ... SELECT popula todos os usuários em uma transação SQL.
 
 -- Um outro motivo, apesar do banco de dados permitir que roles so possam ver ou operar em tabelas selecionadas, essa verificacao teria que ser feita diretamente
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS users_log (
     action    VARCHAR(10)  NOT NULL,
     log_time  TIMESTAMP    NOT NULL DEFAULT NOW(),
     CONSTRAINT pk_users_log PRIMARY KEY (userid, log_time),
-    CONSTRAINT chk_action CHECK (action IN ('LOGIN', 'LOGOUT'))
+    CONSTRAINT chk_action CHECK (action IN ('LOGIN', 'LOGOUT', 'CRIAR_PIL', 'CRIAR_ESC'))
 );
 
 SELECT * FROM users;

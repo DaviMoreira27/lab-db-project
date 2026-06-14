@@ -102,7 +102,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER trg_refresh_mv_aeroportos
-AFTER INSERT ON airports
+AFTER INSERT OR UPDATE OR DELETE ON airports
+FOR EACH STATEMENT
+EXECUTE FUNCTION fn_refresh_mv_aeroportos();
+
+CREATE OR REPLACE TRIGGER trg_refresh_mv_aeroportos_cities
+AFTER INSERT OR UPDATE OR DELETE ON cities
+FOR EACH STATEMENT
+EXECUTE FUNCTION fn_refresh_mv_aeroportos();
+
+CREATE OR REPLACE TRIGGER trg_refresh_mv_aeroportos_countries
+AFTER INSERT OR UPDATE OR DELETE ON countries
 FOR EACH STATEMENT
 EXECUTE FUNCTION fn_refresh_mv_aeroportos();
 
