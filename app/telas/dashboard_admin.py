@@ -41,37 +41,6 @@ class DadosDashboardAdmin:
     escuderias: list[EscuderiaTemporada] = field(default_factory=list)
     pilotos: list[PilotoTemporada] = field(default_factory=list)
 
-
-def _mock() -> DadosDashboardAdmin:
-    return DadosDashboardAdmin(
-        total_pilotos=857,
-        total_escuderias=210,
-        total_temporadas=74,
-        temporada_recente=2024,
-        corridas=[
-            Corrida("Autódromo José Carlos Pace", "02/03/2024", "15:00", 71),
-            Corrida("Circuit de Monaco", "26/05/2024", "15:00", 78),
-            Corrida("Silverstone Circuit", "07/07/2024", "15:00", 52),
-            Corrida("Monza Circuit", "01/09/2024", "15:00", 53),
-            Corrida("Yas Marina Circuit", "08/12/2024", "17:00", 58),
-        ],
-        escuderias=[
-            EscuderiaTemporada("McLaren", 593),
-            EscuderiaTemporada("Ferrari", 557),
-            EscuderiaTemporada("Red Bull", 410),
-            EscuderiaTemporada("Mercedes", 409),
-            EscuderiaTemporada("Aston Martin", 86),
-        ],
-        pilotos=[
-            PilotoTemporada("Max Verstappen", 331),
-            PilotoTemporada("Lando Norris", 279),
-            PilotoTemporada("Charles Leclerc", 245),
-            PilotoTemporada("Oscar Piastri", 233),
-            PilotoTemporada("Carlos Sainz", 290),
-        ],
-    )
-
-
 async def renderizar(usuario: Usuario) -> None:
     raw = await buscar_dados_dashboard()
     totais = raw["totais"]
