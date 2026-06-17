@@ -15,6 +15,7 @@ _pool: asyncpg.Pool | None = None
 async def init_pool() -> None:
     global _pool
     try:
+        # min_size e max_size omitidos: asyncpg usa 10 conexões por padrão.
         _pool = await asyncpg.create_pool(os.environ["DB_STRING"])
     except Exception as e:
         logger.error(f"Erro ao criar pool de conexões: {e}")

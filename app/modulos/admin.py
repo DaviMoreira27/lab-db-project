@@ -17,6 +17,7 @@ async def buscar_dados_dashboard() -> dict:
     pool = get_pool()
     async with pool.acquire() as conexao:
         t = time.perf_counter()
+        # Contagens globais via PKs, sem índices adicionais.
         totais = await conexao.fetchrow(
             "SELECT"
             " (SELECT COUNT(*) FROM drivers) AS pilotos,"
@@ -27,14 +28,17 @@ async def buscar_dados_dashboard() -> dict:
         _log_query("(query) dashboard_totais", time.perf_counter() - t)
 
         t = time.perf_counter()
+        # View definida em dashboard_admin.sql. Usa idx_races_season_id e idx_results_race_id.
         corridas = await conexao.fetch("SELECT * FROM vw_corridas_temporada_atual")
         _log_query("(view)vw_corridas_temporada_atual", time.perf_counter() - t)
 
         t = time.perf_counter()
+        # View definida em dashboard_admin.sql. Usa idx_standings_season_round e idx_constructor_standings_standing_id.
         escuderias = await conexao.fetch("SELECT * FROM vw_escuderias_temporada_atual")
         _log_query("(view)vw_escuderias_temporada_atual", time.perf_counter() - t)
 
         t = time.perf_counter()
+        # View definida em dashboard_admin.sql. Usa idx_standings_season_round e idx_driver_standings_standing_id.
         pilotos = await conexao.fetch("SELECT * FROM vw_pilotos_temporada_atual")
         _log_query("(view)vw_pilotos_temporada_atual", time.perf_counter() - t)
 
@@ -50,6 +54,9 @@ async def buscar_relatorio_status() -> list[asyncpg.Record]:
     pool = get_pool()
     async with pool.acquire() as conexao:
         t = time.perf_counter()
+        # JOIN com agregação: agrupa todos os resultados por status e conta ocorrências.
+        # O JOIN results -> status usa a PK de status(id); sem índice adicional necessário
+        # pois status é uma tabela pequena (sequential scan é mais rápido que index scan).
         result = await conexao.fetch(
             "SELECT s.status, COUNT(r.id) AS total"
             " FROM results r"
@@ -65,6 +72,9 @@ async def buscar_relatorio_aeroportos(nome_cidade: str) -> list[asyncpg.Record]:
     pool = get_pool()
     async with pool.acquire() as conexao:
         t = time.perf_counter()
+        # Consulta a view materializada mv_aeroportos_cidades_br, que pré-computou
+        # as distâncias haversine. O filtro LOWER usa idx_mv_aeroportos_cidade
+        # (índice funcional criado em relatorios_admin.sql), evitando sequential scan.
         result = await conexao.fetch(
             "SELECT cidade_pesquisada, estado, iata_code, aeroporto, cidade_aeroporto, distancia_km, tipo"
             " FROM mv_aeroportos_cidades_br"
@@ -80,6 +90,9 @@ async def buscar_relatorio_escuderias_pilotos() -> list[asyncpg.Record]:
     pool = get_pool()
     async with pool.acquire() as conexao:
         t = time.perf_counter()
+        # LEFT JOIN para incluir escuderias sem resultados (COUNT retorna 0).
+        # O JOIN results -> constructors usa idx_results_constructor_id
+        # (criado em relatorios_admin.sql), evitando sequential scan em results.
         result = await conexao.fetch(
             "SELECT c.name, COUNT(DISTINCT res.driver_id) AS total_pilotos"
             " FROM constructors c"
@@ -95,10 +108,14 @@ async def buscar_relatorio_corridas_hierarquico() -> dict:
     pool = get_pool()
     async with pool.acquire() as conexao:
         t = time.perf_counter()
+        # Contagem total de corridas, usada como nível 1 do relatório hierárquico.
         total = await conexao.fetchval("SELECT COUNT(*) FROM races")
         _log_query("(query)relatorio_corridas_total", time.perf_counter() - t)
 
         t = time.perf_counter()
+        # Nível 2: agrega por circuito com estatísticas de voltas (MIN, AVG, MAX).
+        # LEFT JOIN para incluir corridas sem resultados registrados.
+        # O JOIN results -> races usa idx_results_race_id.
         por_circuito = await conexao.fetch(
             "SELECT"
             "  ci.id AS circuit_id,"
@@ -117,6 +134,8 @@ async def buscar_relatorio_corridas_hierarquico() -> dict:
         _log_query("(query)relatorio_corridas por_circuito", time.perf_counter() - t)
 
         t = time.perf_counter()
+        # Nível 3: detalha cada corrida com voltas e número de pilotos participantes.
+        # JOIN results -> races usa idx_results_race_id.
         por_corrida = await conexao.fetch(
             "SELECT"
             "  r.circuit_id,"
@@ -153,6 +172,9 @@ async def cadastrar_escuderia(
 ) -> None:
     pool = get_pool()
     async with pool.acquire() as conexao:
+        # A transação garante que a trigger trg_sync_constructor (que insere em
+        # USERS) e o registro em USERS_LOG sejam confirmados juntos ou
+        # revertidos em caso de erro, incluindo conflito de login já existente.
         async with conexao.transaction():
             await conexao.execute(
                 "INSERT INTO constructors (constructor_ref, name, country_id, wikipedia_url) VALUES ($1, $2, $3, $4)",
@@ -174,6 +196,8 @@ async def cadastrar_piloto(
 ) -> None:
     pool = get_pool()
     async with pool.acquire() as conexao:
+        # Mesma lógica de transação do cadastrar_escuderia: a trigger
+        # trg_sync_driver cria o usuário em USERS dentro desta transação.
         async with conexao.transaction():
             await conexao.execute(
                 "INSERT INTO drivers (driver_ref, given_name, family_name, date_of_birth, country_id) VALUES ($1, $2, $3, $4, $5)",

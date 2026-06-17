@@ -8,11 +8,14 @@ class CredenciaisInvalidas(Exception):
 
 
 async def login_usuario(email: str, senha: str) -> Usuario:
+    # Autenticação via tabela USERS com pgcrypto: crypt($2, password) rehasha
+    # a senha com o salt original e compara com o hash armazenado, sem expor
+    # texto puro. O campo tipo retornado determina o controle de acesso na UI.
     pool = get_pool()
     async with pool.acquire() as conexao:
         async with conexao.transaction():
             registro = await conexao.fetchrow(
-                # a lib de bycrpt do pyhton e a do postgres esperam formatos de hashes levemente diferentes
+                # a lib de bcrypt do python e a do postgres esperam formatos de hashes levemente diferentes
                 # entao pelos usuarios ja terem sido criados via pgcrypt, e necessario usa-lo tbm para o login
                 "SELECT userid, login, tipo, id_original FROM users WHERE login = $1 AND password = crypt($2, password)",
                 email,

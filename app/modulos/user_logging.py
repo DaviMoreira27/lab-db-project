@@ -7,6 +7,9 @@ type Conexao = asyncpg.Connection | PoolConnectionProxy | None
 
 
 async def _registrar_acao(userid: int, acao: str, conexao: Conexao = None) -> None:
+    # Auditoria na tabela USERS_LOG. Quando conexao é fornecida, o INSERT
+    # ocorre na mesma transação da operação que o originou (login, criação de
+    # piloto/escuderia), garantindo consistência entre a ação e o registro.
     if conexao is not None:
         await conexao.execute(
             "INSERT INTO users_log (userid, action) VALUES ($1, $2)",
