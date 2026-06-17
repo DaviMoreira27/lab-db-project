@@ -1,10 +1,9 @@
 -- Relatório 6 e 7 — Piloto
--- B-tree, sem dúvida. Aqui o raciocínio:
--- O relatório faz três coisas que favorecem B-tree:
--- Filtro por driver_id — equivalência (WHERE driver_id = ?). Hash também serviria aqui.
--- Agrupamento/ordenação por ano — envolve GROUP BY e ORDER BY em race_date. Hash não suporta range/ordenação, B-tree sim.
+-- B-tree
+-- O  que favorece B-tree:
+-- Filtro por driver_id — equivalência (WHERE driver_id = ?). Hash também serviria.
+-- Agrupamento/ordenação por ano — envolve GROUP BY e ORDER BY em race_date. Hash não suporta range/ordenação.
 -- Join results.race_id → races.id — B-tree é o padrão para FK joins.
--- Hash só ganha em equivalência pura e isolada. Aqui tem ordenação envolvida, então B-tree é a escolha certa.
 
 -- Índice em results(driver_id) para filtrar rapidamente os resultados do piloto logado
 CREATE INDEX IF NOT EXISTS idx_results_driver_id 
